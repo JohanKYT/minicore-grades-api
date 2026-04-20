@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minicore Grades App</title>
+    <link rel="stylesheet" th:href="@{/css/index.css}">
+</head>
+<body>
+<main class="container">
+    <header>
+        <h1>Grades App - Minicore</h1>
+    </header>
+
+    <section aria-labelledby="form-heading">
+        <h2 id="form-heading" class="sr-only">Formulario de Fechas por Progreso</h2>
+
+        <form id="calculationForm">
+            <div class="grid-layout">
+                <fieldset>
+                    <legend>Progreso 1</legend>
+                    <label for="p1Start">Fecha de Inicio:</label>
+                    <input type="date" id="p1Start" name="p1Start" required>
+
+                    <label for="p1End">Fecha de Fin:</label>
+                    <input type="date" id="p1End" name="p1End" required>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Progreso 2</legend>
+                    <label for="p2Start">Fecha de Inicio:</label>
+                    <input type="date" id="p2Start" name="p2Start" required>
+
+                    <label for="p2End">Fecha de Fin:</label>
+                    <input type="date" id="p2End" name="p2End" required>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Progreso 3</legend>
+                    <label for="p3Start">Fecha de Inicio:</label>
+                    <input type="date" id="p3Start" name="p3Start" required>
+
+                    <label for="p3End">Fecha de Fin:</label>
+                    <input type="date" id="p3End" name="p3End" required>
+                </fieldset>
+            </div>
+            <button type="submit">CALCULAR NOTAS</button>
+        </form>
+    </section>
+
+    <section aria-labelledby="results-heading">
+        <h2 id="results-heading" style="margin-top: 40px;">Resultados Finales</h2>
+        <table id="resultsTable">
+            <thead>
+            <tr>
+                <th scope="col">Nombre</th>
+                <th scope="col">Progreso 1</th>
+                <th scope="col">Progreso 2</th>
+                <th scope="col">Progreso 3</th>
+                <th scope="col">Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </section>
+</main>
+
+<script>
+    document.getElementById('calculationForm').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const formData = {
+            p1Start: document.getElementById('p1Start').value,
+            p1End: document.getElementById('p1End').value,
+            p2Start: document.getElementById('p2Start').value,
+            p2End: document.getElementById('p2End').value,
+            p3Start: document.getElementById('p3Start').value,
+            p3End: document.getElementById('p3End').value
+        };
+
+        try {
+            // Conexion con render
+            const response = await fetch('/api/grades/calculate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const results = await response.json();
+            const tbody = document.querySelector('#resultsTable tbody');
+            tbody.innerHTML = '';
+
+            results.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                        <td>${row.name}</td>
+                        <td>${row.p1.toFixed(2)}</td>
+                        <td>${row.p2.toFixed(2)}</td>
+                        <td>${row.p3.toFixed(2)}</td>
+                        <td>${row.p3 === 0 ? `<button class="action-btn" onclick="alert('El estudiante necesita: ${row.projection.toFixed(2)} para aprobar')">Ver Proyección</button>` : '-'}</td>
+                    `;
+                tbody.appendChild(tr);
+            });
+        } catch (error) {
+            console.error('Error al conectar con la API:', error);
+            alert('Hubo un problema al calcular las notas. Revisa la consola para más detalles.');
+        }
+    });
+</script>
+</body>
+</html>
