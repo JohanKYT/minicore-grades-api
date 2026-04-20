@@ -1,3 +1,7 @@
+-- Borra los datos 
+TRUNCATE TABLE grades RESTART IDENTITY CASCADE;
+TRUNCATE TABLE students RESTART IDENTITY CASCADE;
+
 -- Estudiantes
 INSERT INTO students (name) VALUES ('Kevin Maquis');
 INSERT INTO students (name) VALUES ('Juan Antamba');
